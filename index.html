@@ -180,14 +180,17 @@
 
   .results{
     display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 10px;
   }
   .card{
     background: var(--paper);
     border: 1px solid var(--line);
     border-radius: 16px;
-    padding: 16px;
+    padding: 10px 14px 10px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     position: relative;
     overflow: hidden;
     box-shadow: 0 6px 16px rgba(22,48,43,0.05);
@@ -200,15 +203,18 @@
     background: var(--accent);
   }
   .role{
-    font-size: 20px;
+    flex: 1.4 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    font-size: 19px;
     font-weight: 800;
     color: var(--ink-soft);
-    margin-bottom: 10px;
-    padding-left: 6px;
     line-height: 1.4;
   }
   .reel{
-    min-height: 56px;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
     border-radius: 10px;
     background: #FBFDFB;
     border: 1.5px dashed var(--line);
@@ -216,11 +222,11 @@
     align-items:center;
     justify-content:center;
     font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 900;
     color: var(--ink);
     overflow: hidden;
-    padding: 6px 8px;
+    padding: 4px 8px;
     text-align: center;
   }
   .reel.spinning{
@@ -267,7 +273,7 @@
         <button class="link-btn" id="allBtn" type="button">全員選択</button>
         <button class="link-btn" id="noneBtn" type="button">全員解除</button>
       </div>
-      <span class="count-badge">今週の人数：<b id="countNum">6</b>人</span>
+      <span class="count-badge">今週の人数：<b id="countNum">8</b>人</span>
     </div>
   </div>
 
@@ -286,10 +292,11 @@
 
 <script>
   // 固定メンバー
-  const NAMES = ["美穂","守内","青木","良","大橋","仁美","正和"];
+  const NAMES = ["美穂","守内","青木","良","大橋","仁美","正和","永井"];
 
-  // 人数ごとの役割セット（7人が基準。人数が減るほど近い作業をまとめる／間引く）
+  // 人数ごとの役割セット（7人が基準、8人は北窓を追加。北窓は優先順位が最も低く、人数が減ると最初に外す。人数が減るほど近い作業をまとめる／間引く）
   const ROLE_SETS = {
+    8: ["エアコン","掃除機（東）","掃除機（西）","南窓・ドア拭き","カッター・名刺ごみ捨て","ポット・電子レンジ拭き","biz＆机の上拭き","北窓周辺拭き"],
     7: ["エアコン","掃除機（東）","掃除機（西）","南窓・ドア拭き","カッター・名刺ごみ捨て","ポット・電子レンジ拭き","biz＆机の上拭き"],
     6: ["エアコン","掃除機（東・西）","南窓・ドア拭き","カッター・名刺ごみ捨て","ポット・電子レンジ拭き","biz＆机の上拭き"],
     5: ["エアコン","掃除機（東・西）","南窓・ドア拭き","カッター・名刺ごみ捨て","ポット電子レンジ＆biz拭き"],
@@ -362,7 +369,24 @@
       card.innerHTML = `<div class="role">${role}</div><div class="reel" id="reel-${i}">—</div>`;
       results.appendChild(card);
     });
+    fitRoles();
   }
+
+  // 掃除場所の文字を、折り返さずに収まる最大サイズ(19px以下)に自動調整
+  function fitRoles(){
+    results.querySelectorAll('.role').forEach(el => {
+      el.style.whiteSpace = 'nowrap';
+      let size = 19;
+      el.style.fontSize = size + 'px';
+      while(el.scrollWidth > el.clientWidth && size > 11){
+        size -= 1;
+        el.style.fontSize = size + 'px';
+      }
+      // 最小サイズでも収まらない長い名前だけ折り返す
+      if(el.scrollWidth > el.clientWidth) el.style.whiteSpace = 'normal';
+    });
+  }
+  window.addEventListener('resize', fitRoles);
 
   function shuffle(arr){
     const a = arr.slice();
